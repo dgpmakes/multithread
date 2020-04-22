@@ -23,7 +23,7 @@ void printQ(queue* test);
  * @param argv
  * @return
  */
-int main (int argc, const char * argv[] ) {
+int main (int argc, const char * argv[] ) { //command, file_name, num_producers, buff_size
 
     queue* test = queue_init(4);
 
@@ -104,21 +104,21 @@ int main (int argc, const char * argv[] ) {
 
 
 
-    /*
-        First of all, we check the arguments
-    */
+    /* First of all, we check the arguments */
 
-   if(argc != 4) perror("Invalid number of arguments.");
+    if(argc != 4) perror("Invalid number of arguments.");
    
-   /*
-        It is checked that the file exists and
-        the number of producers do not exceed the content data.
-    */
+    /* It is checked that the file exists and
+      the number of producers do not exceed the content data. */
 
-   int descr = fopen(argv[1],'r');
-   if(descr==NULL) perror("Invalid number of arguments.");
-    char* amount;
-    //fgets();
+    FILE* openedFile = fopen(argv[1], O_RDONLY);
+
+    if(openedFile == NULL) perror("File does not exist.");
+    char* readAmmount;
+    int* ammount;
+    fgets(readAmmount, 256, openedFile);
+    ammount = atoi(readAmmount);
+    if(ammount < argv[2]) perror("Too many producers");
     
     int total = 0;
     printf("Total: %i €.\n", total);
