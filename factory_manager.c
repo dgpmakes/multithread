@@ -43,24 +43,24 @@ int main (int argc, const char * argv[] ) {
 
 
 
-//     /*
-//         First of all, we check the arguments
-//     */
+    /*
+        First of all, we check the arguments
+    */
 
-//    if(argc != 4) perror("Invalid number of arguments.");
+   if(argc != 4) perror("Invalid number of arguments.");
    
-//    /*
-//         It is checked that the file exists and
-//         the number of producers do not exceed the content data.
-//     */
+   /*
+        It is checked that the file exists and
+        the number of producers do not exceed the content data.
+    */
 
-//    int descr = fopen(argv[1],'r');
-//    if(descr==NULL) perror("Invalid number of arguments.");
-//     char* amount;
-//     //fgets();
+   int descr = fopen(argv[1],'r');
+   if(descr==NULL) perror("Invalid number of arguments.");
+    char* amount;
+    //fgets();
     
-//     int total = 0;
-//     printf("Total: %i €.\n", total);
+    int total = 0;
+    printf("Total: %i €.\n", total);
 
     return 0;
 }
