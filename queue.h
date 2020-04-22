@@ -8,9 +8,13 @@ struct element {
 };
 
 typedef struct queue {
-	// Define the struct yourself
-	int param1;
-}queue;
+
+  int size;
+  struct element** store_array;
+  int head;
+  int tail;
+
+} queue;
 
 queue* queue_init (int size);
 int queue_destroy (queue *q);
