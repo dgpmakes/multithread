@@ -25,17 +25,78 @@ void printQ(queue* test);
  */
 int main (int argc, const char * argv[] ) { //command, file_name, num_producers, buff_size
 
-    queue* test = queue_init(10);
+    queue* test = queue_init(4);
 
-    struct element elementTest;
-    elementTest.time = 12;
-    elementTest.type = 1;
+    struct element elementTest1;
+    elementTest1.time = 1221;
+    elementTest1.type = 1212;
 
-    queue_put(test, &elementTest);
-    queue_put(test, &elementTest);
-    queue_put(test, &elementTest);
+    struct element elementTest2;
+    elementTest2.time = 19;
+    elementTest2.type = 19;
 
+    struct element elementTest3;
+    elementTest3.time = 13;
+    elementTest3.type = 99;
+
+    struct element elementTest4;
+    elementTest4.time = 1;
+    elementTest4.type = 69;
+
+    struct element elementTest5;
+    elementTest5.time = 30;
+    elementTest5.type = 4;
+
+    queue_put(test, &elementTest1);
+    queue_put(test, &elementTest2);
+    queue_put(test, &elementTest3);
+    queue_put(test, &elementTest4);
     printQ(test);
+    //queue_put(test, &elementTest5);
+    queue_get(test);
+    printQ(test);
+    queue_get(test);
+    queue_get(test);
+    printQ(test);
+
+    //Get last element
+    queue_get(test);
+    printQ(test);
+
+    //Set elements from zero phase
+    queue_put(test, &elementTest3);
+    printQ(test);
+    queue_put(test, &elementTest1);
+    printQ(test);
+
+    queue_get(test);
+    printQ(test);
+
+    //Empty again
+    queue_get(test);
+    printQ(test);
+
+    //More empty when already empty
+    queue_get(test);
+    queue_get(test);
+    queue_get(test);
+    queue_get(test);
+    printQ(test);
+
+    //Inser again elements
+    queue_put(test, &elementTest3);
+    queue_put(test, &elementTest2);
+    printQ(test);
+    queue_put(test, &elementTest1);
+    printQ(test);
+
+    //Now test overinsertion
+    queue_put(test, &elementTest4);
+    printQ(test);
+    int result = queue_put(test, &elementTest2);
+    printf("%i\n", result);
+    printQ(test);
+
 
 
 
@@ -94,6 +155,11 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
 
 
 void printQ(queue* test){
+
+    printf("Size: %i\n", test->size);
+    printf("Head: %i\n", test->head);
+    printf("Tail: %i\n", test->tail);
+
     printf("[");
 
     for(int i = 0; i < test->size; i++){
