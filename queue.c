@@ -27,8 +27,13 @@ int queue_put(queue *q, struct element* x) {
 
     if (queue_full(q)) return -1;
     
+    if(queue_empty(q)){
+        q->store_array[q->tail] = x;
+        return 0;
+    }
+
     q->store_array[(q->tail + 1) % q->size] = x;
-    if(!queue_empty(q)) q->tail = ((q->tail + 1) % q->size);
+    q->tail = ((q->tail + 1) % q->size);
 
     return 0;
 }
@@ -39,13 +44,12 @@ struct element* queue_get(queue *q) {
 
     if (queue_empty(q)) return NULL;
 
-
-
     struct element* el = q->store_array[q->head];
     q->store_array[q->head] = NULL;
     if(q->head != q->tail) q->head = (q->head + 1) % q->size;
     
     return el;
+
 }
 
 
@@ -60,7 +64,7 @@ int queue_empty(queue *q){
 
 int queue_full(queue *q){
     
-    return (q->head - q->tail) % q->size == 1;
+    return (q->head - q->tail + q->size) % q->size == 1;
 }
 
 //To destroy the queue and free the resources
