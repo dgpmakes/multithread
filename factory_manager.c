@@ -111,48 +111,60 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
     /* It is checked that the file exists and
       the number of producers do not exceed the content data. */
 
-    FILE* openedFile = fopen(argv[1], O_RDONLY);
+    FILE* openedFile = fopen(argv[1], "r");
 
     if(openedFile == NULL) perror("File does not exist.\n");
-    char* readAmmount;
-    int ammount;
-    fgets(readAmmount, 256, openedFile);
-    ammount = atoi(readAmmount);
+    char readAmount[256];
+    int amount;
 
-    if(ammount < atoi(argv[2])) perror("There can not be more producers than entries.\n");
+    fgets(readAmount, 256, openedFile);
+    printf("hi\n");
+
+    amount = atoi(readAmount);
+
+    if(amount < atoi(argv[2])) perror("There can not be more producers than entries.\n");
+    printf("hia\n");
 
     /* Calculate line blocks for producers */
 
     /* Load file in memory line per line */
 
-    struct element * lines;
-    char * readLine;
+    struct element lines[amount];
+    char readLine[256];
     char * delimiter = " ";
-    for(int i = 0; i < ammount; i++)
+    for(int i = 0; i < amount; i++)
     {
-        char* checkError = fgets(readLine,256,openedFile);
+        char* checkError = fgets(readLine, 256, openedFile);
+        printf("%s", readLine);
         if(checkError == NULL && feof(openedFile)) perror("Unexpected EOF.\n");
-        char * elements = strtok(readLine, delimiter);
-        if(i != elements[0]) perror ("Unexpected index mismatch.\n");
-        lines[i].type = elements[1];
-        lines[i].time = elements[2];
+        
+        //First get the index
+        int elements = atoi(strtok(readLine, delimiter));
+        if(i+1 != elements) 
+            perror("Unexpected index mismatch.\n");
+            
+        int type = atoi(strtok(NULL, delimiter));
+        lines[i].type = type;
+        int time = atoi(strtok(NULL, delimiter));
+        lines[i].time = time;
 
     }
+    printf("hawaii\n");
 
     //test
-    for(int i = 0; i < 100; i++){
-        printf("{type: %i, time: %i}\n", lines[i].type, lines[i].time);
+    for(int i = 0; i < amount; i++){
+        printf("%i{type: %i, time: %i}\n", i, lines[i].type, lines[i].time);
     }
 
     /* Distribution of lines per producer */
-
-    int threading;
-
-    int total = 0;
-    printf("Total: %i €.\n", total);
+    
+    int num_producers = atoi(argv[2]);
+    
 
     return 0;
 }
+
+
 
 
 void printQ(queue* test){
