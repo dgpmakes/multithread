@@ -115,10 +115,11 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
 
     if(openedFile == NULL) perror("File does not exist.\n");
     char* readAmmount;
-    int* ammount;
+    int ammount;
     fgets(readAmmount, 256, openedFile);
     ammount = atoi(readAmmount);
-    if(ammount < argv[2]) perror("There can not be more producers than entries.\n");
+
+    if(ammount < atoi(argv[2])) perror("There can not be more producers than entries.\n");
 
     /* Calculate line blocks for producers */
 
