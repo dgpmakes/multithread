@@ -15,6 +15,12 @@ queue* queue_init(int size){
     /* Initialize the queue */
     q->size = size;
     q->store_array = (struct element **) malloc(sizeof(struct element*) * size);
+    
+    //Initialize the array
+    for(int i = 0; i < size; i++){
+        q->store_array[i] = NULL;
+    }
+
     q->head = 0;
     q->tail = 0;
 

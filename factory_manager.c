@@ -161,6 +161,7 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
         lines[i].time = time;
 
     }
+    fclose(openedFile);
     printf("\n");
 
 
@@ -196,15 +197,6 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
     p_args[num_producers - 1].q = main_queue;
     pthread_create(&threads[num_producers - 1], NULL, producer, &p_args[num_producers - 1]);
 
-
-
-
-
-    // Join all the threads
-    for(int i = 0; i < num_producers; i++){
-        pthread_join(threads[i], NULL);
-    }
-
     //Create the consumer
     int total_sum = 0;
     struct consumer_args c_args;
@@ -213,24 +205,35 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
     c_args.line_count = line_count;
     pthread_create(&consumer_thread, NULL, consumer, &c_args);
 
+
+    // Join all the threads
+    for(int i = 0; i < num_producers; i++){
+        pthread_join(threads[i], NULL);
+    }
+
+
     pthread_join(consumer_thread, NULL);
-    printf("%i\n", *c_args.total_sum);
+    printf("%i\n", total_sum);
 
     //printQ(main_queue);
-
-
+    queue_destroy(main_queue);
+    for(int i = 0; i < num_producers; i++){
+        pthread_join(threads[i], NULL);
+    }
     return 0;
 }
 
 
 void* producer(void* args){
     struct producer_args p_args = *((struct producer_args*) args);
-
+    
     for(int i = 0; i < p_args.end - p_args.start + 1; i++){
         queue_put(p_args.q, &p_args.lines[i + p_args.start]);
     }
 
-    pthread_exit(NULL);
+    //pthread_exit(NULL);
+
+    return NULL;
 
 }
 
@@ -238,18 +241,20 @@ void* consumer(void* args){
 
     struct consumer_args* c_args = (struct consumer_args*) args;
 
+
     for(int i = 0; i < c_args->line_count; i++){
         struct element* result = queue_get(c_args->q);
         
+
         switch (result->type) {
         case 1:
-            c_args->total_sum += result->time;
+            *(c_args->total_sum) += result->time;
             break;
         case 2:
-            c_args->total_sum += 3*result->time;
+            *(c_args->total_sum) += 3*result->time;
             break;
         case 3:
-            c_args->total_sum += 10*result->time;
+            *(c_args->total_sum) += 10*result->time;
             break;
         default:
             perror("The machine is not defined.\n");
@@ -257,12 +262,16 @@ void* consumer(void* args){
         }
 
     }
-    printf("\n\n%i\n\n",*(c_args->total_sum));
-    pthread_exit(NULL);
+
+    //printf("\n\n%i\n\n", *(c_args->total_sum));
+
+    //pthread_exit(NULL);
 
     return 0;
 
 }
+
+
 
 
 
