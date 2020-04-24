@@ -14,8 +14,21 @@
 
 #define NUM_CONSUMERS 1
 
+//Function declaration
 void printQ(queue* test);
+void* producer(void* producer_args);
+void* consumer(void* consumer_args);
 
+struct producer_args {
+    int start;
+    int end;
+    struct element* lines;
+    queue* q;
+};
+
+struct consumer_args {
+    queue* q;
+};
 
 /**
  * Entry point
@@ -25,77 +38,77 @@ void printQ(queue* test);
  */
 int main (int argc, const char * argv[] ) { //command, file_name, num_producers, buff_size
 
-    queue* test = queue_init(4);
+    // queue* test = queue_init(4);
 
-    struct element elementTest1;
-    elementTest1.time = 1221;
-    elementTest1.type = 1212;
+    // struct element elementTest1;
+    // elementTest1.time = 1221;
+    // elementTest1.type = 1212;
 
-    struct element elementTest2;
-    elementTest2.time = 19;
-    elementTest2.type = 19;
+    // struct element elementTest2;
+    // elementTest2.time = 19;
+    // elementTest2.type = 19;
 
-    struct element elementTest3;
-    elementTest3.time = 13;
-    elementTest3.type = 99;
+    // struct element elementTest3;
+    // elementTest3.time = 13;
+    // elementTest3.type = 99;
 
-    struct element elementTest4;
-    elementTest4.time = 1;
-    elementTest4.type = 69;
+    // struct element elementTest4;
+    // elementTest4.time = 1;
+    // elementTest4.type = 69;
 
-    struct element elementTest5;
-    elementTest5.time = 30;
-    elementTest5.type = 4;
+    // struct element elementTest5;
+    // elementTest5.time = 30;
+    // elementTest5.type = 4;
 
-    queue_put(test, &elementTest1);
-    queue_put(test, &elementTest2);
-    queue_put(test, &elementTest3);
-    queue_put(test, &elementTest4);
-    printQ(test);
-    //queue_put(test, &elementTest5);
-    queue_get(test);
-    printQ(test);
-    queue_get(test);
-    queue_get(test);
-    printQ(test);
+    // queue_put(test, &elementTest1);
+    // queue_put(test, &elementTest2);
+    // queue_put(test, &elementTest3);
+    // queue_put(test, &elementTest4);
+    // printQ(test);
+    // //queue_put(test, &elementTest5);
+    // queue_get(test);
+    // printQ(test);
+    // queue_get(test);
+    // queue_get(test);
+    // printQ(test);
 
-    //Get last element
-    queue_get(test);
-    printQ(test);
+    // //Get last element
+    // queue_get(test);
+    // printQ(test);
 
-    //Set elements from zero phase
-    queue_put(test, &elementTest3);
-    printQ(test);
-    queue_put(test, &elementTest1);
-    printQ(test);
+    // //Set elements from zero phase
+    // queue_put(test, &elementTest3);
+    // printQ(test);
+    // queue_put(test, &elementTest1);
+    // printQ(test);
 
-    queue_get(test);
-    printQ(test);
+    // queue_get(test);
+    // printQ(test);
 
-    //Empty again
-    queue_get(test);
-    printQ(test);
+    // //Empty again
+    // queue_get(test);
+    // printQ(test);
 
-    //More empty when already empty
-    queue_get(test);
-    queue_get(test);
-    queue_get(test);
-    queue_get(test);
-    printQ(test);
+    // //More empty when already empty
+    // queue_get(test);
+    // queue_get(test);
+    // queue_get(test);
+    // queue_get(test);
+    // printQ(test);
 
-    //Inser again elements
-    queue_put(test, &elementTest3);
-    queue_put(test, &elementTest2);
-    printQ(test);
-    queue_put(test, &elementTest1);
-    printQ(test);
+    // //Inser again elements
+    // queue_put(test, &elementTest3);
+    // queue_put(test, &elementTest2);
+    // printQ(test);
+    // queue_put(test, &elementTest1);
+    // printQ(test);
 
-    //Now test overinsertion
-    queue_put(test, &elementTest4);
-    printQ(test);
-    int result = queue_put(test, &elementTest2);
-    printf("%i\n", result);
-    printQ(test);
+    // //Now test overinsertion
+    // queue_put(test, &elementTest4);
+    // printQ(test);
+    // int result = queue_put(test, &elementTest2);
+    // printf("%i\n", result);
+    // printQ(test);
 
 
 
@@ -114,25 +127,22 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
     FILE* openedFile = fopen(argv[1], "r");
 
     if(openedFile == NULL) perror("File does not exist.\n");
-    char readAmount[256];
-    int amount;
+    char firstLine[256];
+    int line_count;
 
-    fgets(readAmount, 256, openedFile);
-    printf("hi\n");
+    fgets(firstLine, 256, openedFile);
 
-    amount = atoi(readAmount);
+    line_count = atoi(firstLine);
 
-    if(amount < atoi(argv[2])) perror("There can not be more producers than entries.\n");
-    printf("hia\n");
+    if(line_count < atoi(argv[2])) perror("There can not be more producers than entries.\n");
 
-    /* Calculate line blocks for producers */
 
     /* Load file in memory line per line */
 
-    struct element lines[amount];
+    struct element lines[line_count];
     char readLine[256];
     char * delimiter = " ";
-    for(int i = 0; i < amount; i++)
+    for(int i = 0; i < line_count; i++)
     {
         char* checkError = fgets(readLine, 256, openedFile);
         printf("%s", readLine);
@@ -149,20 +159,97 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
         lines[i].time = time;
 
     }
-    printf("hawaii\n");
+    printf("\n");
+
 
     //test
-    for(int i = 0; i < amount; i++){
+    for(int i = 0; i < line_count; i++){
         printf("%i{type: %i, time: %i}\n", i, lines[i].type, lines[i].time);
     }
 
     /* Distribution of lines per producer */
     
     int num_producers = atoi(argv[2]);
-    
+    int circular_queue_size = atoi(argv[3]);
+
+    pthread_t threads[num_producers];
+    struct producer_args p_args[num_producers];
+    pthread_t consumer_thread;
+
+    //Create the queue
+    queue* main_queue = queue_init(circular_queue_size);
+
+    //Create producers threads
+    for(int i = 0; i < num_producers - 1; i++){
+        p_args[i].start = i*(line_count/num_producers);
+        p_args[i].end =  p_args[i].start + (line_count/num_producers) - 1;
+        p_args[i].lines = lines;
+        p_args[i].q = main_queue;
+        pthread_create(&threads[i], NULL, producer, &p_args[i]);
+    }
+    //Last one takes more
+    p_args[num_producers - 1].start = (num_producers - 1)*(line_count/num_producers);
+    p_args[num_producers - 1].end =  line_count;
+    p_args[num_producers - 1].lines = lines;
+    p_args[num_producers - 1].q = main_queue;
+    pthread_create(&threads[num_producers - 1], NULL, producer, &p_args[num_producers - 1]);
+
+    //Create the consumer
+    struct consumer_args c_args;
+    c_args.q = main_queue;
+    pthread_create(&consumer_thread, NULL, consumer, &c_args);
+
+
+    // Join all the threads
+    for(int i = 0; i < num_producers; i++){
+        pthread_join(threads[i], NULL);
+    }
+
+    printQ(main_queue);
+
 
     return 0;
 }
+
+
+void* producer(void* args){
+    struct producer_args p_args = *((struct producer_args*) (args));
+
+    for(int i = 0; i < p_args.end - p_args.start + 1; i++){
+        queue_put(p_args.q, &p_args.lines[i + p_args.start]);
+    }
+
+}
+
+void* consumer(void* args){
+
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
