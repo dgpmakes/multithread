@@ -1,5 +1,6 @@
 #ifndef HEADER_FILE
 #define HEADER_FILE
+#include <semaphore.h>
 
 
 struct element {
@@ -13,6 +14,7 @@ typedef struct queue {
   struct element** store_array;
   int head;
   int tail;
+  sem_t semaphore;
 
 } queue;
 

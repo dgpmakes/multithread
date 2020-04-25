@@ -210,16 +210,14 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
     for(int i = 0; i < num_producers; i++){
         pthread_join(threads[i], NULL);
     }
-
-
+    
     pthread_join(consumer_thread, NULL);
     printf("%i\n", total_sum);
 
     //printQ(main_queue);
     queue_destroy(main_queue);
-    for(int i = 0; i < num_producers; i++){
-        pthread_join(threads[i], NULL);
-    }
+
+
     return 0;
 }
 
