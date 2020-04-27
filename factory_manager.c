@@ -121,14 +121,27 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
 
     /* First of all, we check the arguments */
 
-    if(argc != 4) perror("Invalid number of arguments.");
+    if(argc != 4){
+        perror("Invalid number of arguments.");
+        return -1;
+    } 
+
+    //printf("DEBUG: checked arguments \n");
+
    
     /* It is checked that the file exists and
       the number of producers do not exceed the content data. */
 
     FILE* openedFile = fopen(argv[1], "r");
 
-    if(openedFile == NULL) perror("File does not exist.\n");
+    if(openedFile == NULL){
+        perror("File does not exist.\n");
+        return -1;
+    } 
+
+        //printf("DEBUG: opened file \n");
+
+
     char firstLine[256];
     int line_count;
 
@@ -138,16 +151,17 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
 
     if(line_count < atoi(argv[2])) perror("There can not be more producers than entries.\n");
 
+        //printf("DEBUG: checked entries number of file with lines count: %i\n", line_count);
 
     /* Load file in memory line per line */
 
-    struct element lines[line_count];
+    struct element* lines = malloc(sizeof(struct element) * line_count);
     char readLine[256];
     char * delimiter = " ";
     for(int i = 0; i < line_count; i++)
     {
         char* checkError = fgets(readLine, 256, openedFile);
-        printf("%s", readLine);
+        //printf("%s", readLine);
         if(checkError == NULL && feof(openedFile)) perror("Unexpected EOF.\n");
         
         //First get the index
@@ -162,74 +176,99 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
 
     }
     fclose(openedFile);
-    printf("\n");
+        //printf("DEBUG: loaded file in memory \n");
+
+
+    //printf("\n");
+
 
 
     //test
     for(int i = 0; i < line_count; i++){
-        printf("%i{type: %i, time: %i}\n", i, lines[i].type, lines[i].time);
+        //printf("%i{type: %i, time: %i}\n", i, lines[i].type, lines[i].time);
     }
 
     /* Distribution of lines per producer */
     
     int num_producers = atoi(argv[2]);
     int circular_queue_size = atoi(argv[3]);
-
-    pthread_t threads[num_producers];
-    struct producer_args p_args[num_producers];
-    pthread_t consumer_thread;
-
-    //Create the queue
+    
+    //The queue all the threads will use
     queue* main_queue = queue_init(circular_queue_size);
+        //printQ(main_queue);
+        //printf("DEBUG: created queue, starting threads... \n");
 
     //Create producers threads
+    pthread_t threads[num_producers];
+    struct producer_args* p_args = (struct producer_args*) malloc(sizeof(struct producer_args) * num_producers);
+
     for(int i = 0; i < num_producers - 1; i++){
         p_args[i].start = i*(line_count/num_producers);
         p_args[i].end =  p_args[i].start + (line_count/num_producers) - 1;
         p_args[i].lines = lines;
         p_args[i].q = main_queue;
         pthread_create(&threads[i], NULL, producer, &p_args[i]);
+        //printf("DEBUG: created producer thread %i\n", i);
+
     }
-    //Last one takes more
+    //Last producer threads takes the leftovers
     p_args[num_producers - 1].start = (num_producers - 1)*(line_count/num_producers);
-    p_args[num_producers - 1].end =  line_count;
+    p_args[num_producers - 1].end =  line_count - 1;
     p_args[num_producers - 1].lines = lines;
     p_args[num_producers - 1].q = main_queue;
     pthread_create(&threads[num_producers - 1], NULL, producer, &p_args[num_producers - 1]);
+    //printf("DEBUG: created producer thread %i\n", num_producers - 1);
 
     //Create the consumer
-    int total_sum = 0;
-    struct consumer_args c_args;
-    c_args.total_sum = &total_sum;
-    c_args.q = main_queue;
-    c_args.line_count = line_count;
-    pthread_create(&consumer_thread, NULL, consumer, &c_args);
+    int* total_sum = (int*) malloc(sizeof(int));
+    *total_sum = 0;
+    struct consumer_args* c_args = (struct consumer_args*) malloc(sizeof(struct consumer_args));
+    c_args->total_sum = total_sum;
+    c_args->q = main_queue;
+    c_args->line_count = line_count;
+    pthread_t consumer_thread;
+    pthread_create(&consumer_thread, NULL, consumer, (void*) c_args);
+        //printf("DEBUG: created consumer thread\n");
 
+        //sleep(10);
+
+        //printf("DEBUG: begin to join producer threads\n");
 
     // Join all the threads
     for(int i = 0; i < num_producers; i++){
+        //printf("DEBUG: joining producer %i\n", i);
+
         pthread_join(threads[i], NULL);
     }
-    
+    //printf("DEBUG: joining consumer\n");
+
     pthread_join(consumer_thread, NULL);
-    printf("%i\n", total_sum);
+
+    //printf("DEBUG: printing sum\n");
+
+    printf("Total sum: %i\n", *total_sum);
+
+    //printf("DEBUG: destroying queue\n");
 
     //printQ(main_queue);
     queue_destroy(main_queue);
-
+    
+    //printf("DEBUG: program finished without problems.\n");
 
     return 0;
 }
 
 
 void* producer(void* args){
-    struct producer_args p_args = *((struct producer_args*) args);
+    struct producer_args* p_args = args;
     
-    for(int i = 0; i < p_args.end - p_args.start + 1; i++){
-        queue_put(p_args.q, &p_args.lines[i + p_args.start]);
+    //printf("%i-%i\n", p_args->start, p_args->end);
+
+    for(int i = 0; i < p_args->end - p_args->start + 1; i++){
+        queue_put(p_args->q, p_args->lines[i + p_args->start]);
     }
 
-    //pthread_exit(NULL);
+    pthread_exit(NULL);
 
     return NULL;
 
@@ -241,21 +280,21 @@ void* consumer(void* args){
 
 
     for(int i = 0; i < c_args->line_count; i++){
-        struct element* result = queue_get(c_args->q);
+        struct element result = queue_get(c_args->q);
         
 
-        switch (result->type) {
+        switch (result.type) {
         case 1:
-            *(c_args->total_sum) += result->time;
+            *(c_args->total_sum) += result.time;
             break;
         case 2:
-            *(c_args->total_sum) += 3*result->time;
+            *(c_args->total_sum) += 3*result.time;
             break;
         case 3:
-            *(c_args->total_sum) += 10*result->time;
+            *(c_args->total_sum) += 10*result.time;
             break;
         default:
-            perror("The machine is not defined.\n");
+            printf("The machine is not defined.%i\n", result.type);
             break;
         }
 
@@ -263,7 +302,7 @@ void* consumer(void* args){
 
     //printf("\n\n%i\n\n", *(c_args->total_sum));
 
-    //pthread_exit(NULL);
+    pthread_exit(NULL);
 
     return 0;
 
@@ -307,12 +346,12 @@ void printQ(queue* test){
     printf("[");
 
     for(int i = 0; i < test->size; i++){
-        if(test->store_array[i] != NULL){
+        if(test->store_array[i].type != -1){
             printf("(%i) ", i);
             if(test->head == i) printf("|H|");
             if(test->tail == i) printf("|T|");
 
-            printf("{type %i time %i}", test->store_array[i]->type, test->store_array[i]->time);
+            printf("{type %i time %i}", test->store_array[i].type, test->store_array[i].time);
             
             if(test->head == i) printf("|H|");
             if(test->tail == i) printf("|T|");

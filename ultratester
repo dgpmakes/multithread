@@ -1,0 +1,59 @@
+#primer arg: run#
+#segundo arg: pattern
+#tercer arg: output
+
+#Comprobar numero de argumentos
+if [ "$#" -ne 3 ]; then
+   echo "Usar dos arguentos"
+   exit -1
+fi
+
+echo "Inicializando"
+rm -rf $3
+sleep 1
+touch $3
+echo "xd" > out.txt
+
+RUNS=$1
+PATTERN=$2
+OUTPUT=$3
+
+START="^"
+END="$"
+PATTER=$START$PATTERN$END
+
+COUNTER=0
+
+while [ $COUNTER -lt $RUNS ]; do
+   ./factory testing 499 2 1>> "${OUTPUT}"
+   ./factory testing 50 50000 1>> "${OUTPUT}"
+   ./factory testing 13 100 1>> "${OUTPUT}"
+   ./factory testing 1 2 1>> "${OUTPUT}"
+   ./factory testing 500 5 1>> "${OUTPUT}"
+   PROGRESS=$(echo "scale=2;($COUNTER/$RUNS)*100" | bc -l)
+   echo -ne "$PROGRESS%\r"
+COUNTER=$((COUNTER + 1))
+done
+echo $COUNTER
+
+CORRECT=0
+echo "Comprobando resultados"
+while read line; do
+if [[ $line =~ $PATTERN ]] 
+then
+   CORRECT=$((CORRECT + 1))
+else
+   echo "unexpected result"
+fi
+done < $OUTPUT
+
+
+
+CORRECT=$(echo "$CORRECT/5" | bc -l)
+# echo "C"$CORRECT
+# echo "R"$RUNS
+
+RESULT=$(echo "scale=0;($CORRECT/$RUNS)*100" | bc -l)
+echo "${RESULT}% of determinism"
+rm out.txt
+
