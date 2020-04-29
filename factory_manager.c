@@ -278,7 +278,6 @@ void* consumer(void* args){
 
     struct consumer_args* c_args = (struct consumer_args*) args;
 
-
     for(int i = 0; i < c_args->line_count; i++){
         struct element result = queue_get(c_args->q);
         
@@ -294,7 +293,7 @@ void* consumer(void* args){
             *(c_args->total_sum) += 10*result.time;
             break;
         default:
-            printf("The machine is not defined.%i\n", result.type);
+            printf("The machine is not defined.%i%i\n", result.type, result.time);
             break;
         }
 

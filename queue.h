@@ -10,10 +10,13 @@ struct element {
 typedef struct queue {
 
   int size;
+  int current_size;
   struct element* store_array;
   int head;
   int tail;
   pthread_mutex_t mutex;
+  pthread_cond_t full;
+  pthread_cond_t empty;
 
 } queue;
 
