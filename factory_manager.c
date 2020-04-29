@@ -40,84 +40,7 @@ struct consumer_args {
  */
 int main (int argc, const char * argv[] ) { //command, file_name, num_producers, buff_size
 
-    // queue* test = queue_init(4);
-
-    // struct element elementTest1;
-    // elementTest1.time = 1221;
-    // elementTest1.type = 1212;
-
-    // struct element elementTest2;
-    // elementTest2.time = 19;
-    // elementTest2.type = 19;
-
-    // struct element elementTest3;
-    // elementTest3.time = 13;
-    // elementTest3.type = 99;
-
-    // struct element elementTest4;
-    // elementTest4.time = 1;
-    // elementTest4.type = 69;
-
-    // struct element elementTest5;
-    // elementTest5.time = 30;
-    // elementTest5.type = 4;
-
-    // queue_put(test, &elementTest1);
-    // queue_put(test, &elementTest2);
-    // queue_put(test, &elementTest3);
-    // queue_put(test, &elementTest4);
-    // printQ(test);
-    // //queue_put(test, &elementTest5);
-    // queue_get(test);
-    // printQ(test);
-    // queue_get(test);
-    // queue_get(test);
-    // printQ(test);
-
-    // //Get last element
-    // queue_get(test);
-    // printQ(test);
-
-    // //Set elements from zero phase
-    // queue_put(test, &elementTest3);
-    // printQ(test);
-    // queue_put(test, &elementTest1);
-    // printQ(test);
-
-    // queue_get(test);
-    // printQ(test);
-
-    // //Empty again
-    // queue_get(test);
-    // printQ(test);
-
-    // //More empty when already empty
-    // queue_get(test);
-    // queue_get(test);
-    // queue_get(test);
-    // queue_get(test);
-    // printQ(test);
-
-    // //Inser again elements
-    // queue_put(test, &elementTest3);
-    // queue_put(test, &elementTest2);
-    // printQ(test);
-    // queue_put(test, &elementTest1);
-    // printQ(test);
-
-    // //Now test overinsertion
-    // queue_put(test, &elementTest4);
-    // printQ(test);
-    // int result = queue_put(test, &elementTest2);
-    // printf("%i\n", result);
-    // printQ(test);
-
-
-
-
-
-
-
+    
 
     /* First of all, we check the arguments */
 
@@ -161,7 +84,6 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
     for(int i = 0; i < line_count; i++)
     {
         char* checkError = fgets(readLine, 256, openedFile);
-        //printf("%s", readLine);
         if(checkError == NULL && feof(openedFile)) perror("Unexpected EOF.\n");
         
         //First get the index
@@ -200,7 +122,8 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
 
     //Create producers threads
     pthread_t threads[num_producers];
-    struct producer_args* p_args = (struct producer_args*) malloc(sizeof(struct producer_args) * num_producers);
+    //struct producer_args* p_args = (struct producer_args*) malloc(sizeof(struct producer_args) * num_producers);
+    struct producer_args p_args [num_producers];
 
     for(int i = 0; i < num_producers - 1; i++){
         p_args[i].start = i*(line_count/num_producers);
@@ -228,33 +151,19 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
     c_args->line_count = line_count;
     pthread_t consumer_thread;
     pthread_create(&consumer_thread, NULL, consumer, (void*) c_args);
-        //printf("DEBUG: created consumer thread\n");
-
-        //sleep(10);
-
-        //printf("DEBUG: begin to join producer threads\n");
 
     // Join all the threads
     for(int i = 0; i < num_producers; i++){
-        //printf("DEBUG: joining producer %i\n", i);
 
         pthread_join(threads[i], NULL);
     }
-    //printf("DEBUG: joining consumer\n");
 
     pthread_join(consumer_thread, NULL);
 
-    //printf("DEBUG: printing sum\n");
-
     printf("Total sum: %i\n", *total_sum);
 
-    //printf("DEBUG: destroying queue\n");
-
-    //printQ(main_queue);
     queue_destroy(main_queue);
     
-    //printf("DEBUG: program finished without problems.\n");
-
     return 0;
 }
 
@@ -262,8 +171,6 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
 void* producer(void* args){
     struct producer_args* p_args = args;
     
-    //printf("%i-%i\n", p_args->start, p_args->end);
-
     for(int i = 0; i < p_args->end - p_args->start + 1; i++){
         queue_put(p_args->q, p_args->lines[i + p_args->start]);
     }
@@ -298,8 +205,6 @@ void* consumer(void* args){
         }
 
     }
-
-    //printf("\n\n%i\n\n", *(c_args->total_sum));
 
     pthread_exit(NULL);
 

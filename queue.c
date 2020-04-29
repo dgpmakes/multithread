@@ -51,7 +51,7 @@ int queue_put(queue *q, struct element x) {
 
     }
 
-    
+
     if(queue_empty(q)){
         q->store_array[q->tail] = x;
     } else {
@@ -81,23 +81,16 @@ struct element queue_get(queue *q) {
 
     while(queue_empty(q)){
 
-        // printf("the queue is empty... waiting\n");
         pthread_cond_wait(&q->empty, &q->mutex);
 
     } 
-
-
-
 
     struct element el = q->store_array[q->head];
     q->store_array[q->head].type = -1;
     q->store_array[q->head].time = -1;
     if(q->head != q->tail) q->head = (q->head + 1) % q->size;
     q->current_size--;
-    // printf("%i\n", q->current_size);
 
-    // printf("signal the queue will be not full (pop one)\n");
-    // printQQ(q);
     pthread_cond_signal(&q->full);
 
     pthread_mutex_unlock(&q->mutex);
@@ -110,24 +103,10 @@ struct element queue_get(queue *q) {
 //To check queue state
 int queue_empty(queue *q){
 
-    //pthread_mutex_lock(&q->mutex);
-    
-    //int ret = q->head == q->tail 
-    //&& q->store_array[q->head].type == -1
-    //&& q->store_array[q->tail].type == -1;
-    //pthread_mutex_unlock(&q->mutex);
-
     return q->current_size == 0;
-
 }
 
 int queue_full(queue *q){
-
-    //pthread_mutex_lock(&q->mutex);
-
-    //int ret = (q->head - q->tail + q->size) % q->size == 1;
-    
-    //pthread_mutex_unlock(&q->mutex);
 
     return q->current_size == q->size;
 }
@@ -136,7 +115,6 @@ int queue_full(queue *q){
 int queue_destroy(queue *q){
     
 
-
     /* Free each element struct in the array */
     // for(int i = 0; i < sizeof(q->store_array)/sizeof(q->store_array[0]); i++){
     //     if(q->store_array[i] != NULL) free(q->store_array[i]);
@@ -144,8 +122,6 @@ int queue_destroy(queue *q){
     pthread_mutex_destroy(&q->mutex);
     free(q->store_array);
     free(q);
-
-
 
     return 0;
 

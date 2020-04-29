@@ -1,3 +1,4 @@
 factory
 *.o
 .vscode/*
+out2.txt
