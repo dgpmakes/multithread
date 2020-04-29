@@ -1,0 +1,5 @@
+NAME="ssoo_p3_100405867_100405855_100405799.zip"
+
+rm $NAME
+NAME="ssoo_p3_100405867_100405855_100405799.zip"
+zip $NAME Authors.txt costCalculator.c queue.c queue.h Makefile

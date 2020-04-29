@@ -45,9 +45,14 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
     /* First of all, we check the arguments */
 
     if(argc != 4){
-        perror("Invalid number of arguments.");
+        perror("Invalid number of arguments.\n");
         return -1;
-    } 
+    }
+
+    if(atoi(argv[3]) < 1){
+        perror("Invalid buffer size.\n");
+        return -1;
+    }
 
     //printf("DEBUG: checked arguments \n");
 
@@ -160,7 +165,7 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
 
     pthread_join(consumer_thread, NULL);
 
-    printf("Total sum: %i\n", *total_sum);
+    printf("Total: %i €.\n", *total_sum);
 
     queue_destroy(main_queue);
     

@@ -1,6 +1,6 @@
 CC=gcc
 FLAGS=-g -Wall -Werror
-OBJ= queue factory_manager
+OBJ= queue costCalculator
 LIBS= -pthread
 
 all:  $(OBJ)
@@ -11,14 +11,14 @@ all:  $(OBJ)
 queue: queue.c
 	$(CC) -c queue.c
 
-factory_manager:	factory_manager.c
-	$(CC) $(CFLAGS) $(LIBS) -o factory  factory_manager.c queue.c
+costCalculator:	costCalculator.c
+	$(CC) $(CFLAGS) $(LIBS) -o calculator  costCalculator.c queue.c
 
 load:
-	ld -o factory queue.o
+	ld -o calculator queue.o
 
 clean:
-	rm -f factory process *.o
+	rm -f calculator process *.o
 	@echo "***************************"
 	@echo "Deleted files!"
 	@echo  ""
