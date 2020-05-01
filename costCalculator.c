@@ -178,13 +178,13 @@ void* consumer(void* args){
 
         switch (result.type) {
         case 1:
-            (c_args->total_sum) += result.time;
+            c_args->total_sum += result.time;
             break;
         case 2:
-            (c_args->total_sum) += 3*result.time;
+            c_args->total_sum += 3*result.time;
             break;
         case 3:
-            (c_args->total_sum) += 10*result.time;
+            c_args->total_sum += 10*result.time;
             break;
         default:
             printf("The machine is not defined.%i%i\n", result.type, result.time);
