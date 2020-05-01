@@ -49,8 +49,8 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
         return -1;
     }
 
-    if(atoi(argv[3]) < 1){
-        perror("Invalid buffer size.\n");
+    if(atoi(argv[2])<1 || atoi(argv[3])<1){
+        perror("Invalid parameters type/size.\n");
         return -1;
     }
 
@@ -75,6 +75,10 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
 
     fgets(firstLine, 256, openedFile);
 
+    if(atoi(firstLine) == 0){
+        perror("Invalid total number of lines.\n");
+        return -1;
+    }
     line_count = atoi(firstLine);
 
     if(line_count < atoi(argv[2])) perror("There can not be more producers than entries.\n");
@@ -89,7 +93,7 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
     for(int i = 0; i < line_count; i++)
     {
         char* checkError = fgets(readLine, 256, openedFile);
-        if(checkError == NULL && feof(openedFile)) perror("Unexpected EOF.\n");
+        if(checkError == NULL && feof(openedFile)){ perror("Unexpected EOF.\n"); return 1;}
         
         //First get the index
         int elements = atoi(strtok(readLine, delimiter));
