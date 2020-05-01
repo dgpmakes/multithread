@@ -4,7 +4,7 @@
 
 #Comprobar numero de argumentos
 if [ "$#" -ne 3 ]; then
-   echo "Usar dos arguentos"
+   echo "Usar tres arguentos"
    exit -1
 fi
 
@@ -12,7 +12,6 @@ echo "Inicializando"
 rm -rf $3
 sleep 1
 touch $3
-echo "xd" > out.txt
 
 RUNS=$1
 PATTERN=$2
@@ -25,13 +24,16 @@ PATTER=$START$PATTERN$END
 COUNTER=0
 
 while [ $COUNTER -lt $RUNS ]; do
-   ./factory testing 499 2 1>> "${OUTPUT}"
-   ./factory testing 50 50000 1>> "${OUTPUT}"
-   ./factory testing 13 100 1>> "${OUTPUT}"
-   ./factory testing 1 2 1>> "${OUTPUT}"
-   ./factory testing 500 5 1>> "${OUTPUT}"
+   ./calculator testing 499 2 1>> "${OUTPUT}"
+   ./calculator testing 50 50000 1>> "${OUTPUT}"
+   ./calculator testing 13 100 1>> "${OUTPUT}"
+   ./calculator testing 1 2 1>> "${OUTPUT}"
+   ./calculator testing 500 5 1>> "${OUTPUT}"
+   ./calculator testing 23 1 1>> "${OUTPUT}"
+
    PROGRESS=$(echo "scale=2;($COUNTER/$RUNS)*100" | bc -l)
    echo -ne "$PROGRESS%\r"
+
 COUNTER=$((COUNTER + 1))
 done
 echo $COUNTER
@@ -55,5 +57,3 @@ CORRECT=$(echo "$CORRECT/5" | bc -l)
 
 RESULT=$(echo "scale=0;($CORRECT/$RUNS)*100" | bc -l)
 echo "${RESULT}% of determinism"
-rm out.txt
-

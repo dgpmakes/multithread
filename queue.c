@@ -119,7 +119,8 @@ int queue_destroy(queue *q){
     // for(int i = 0; i < sizeof(q->store_array)/sizeof(q->store_array[0]); i++){
     //     if(q->store_array[i] != NULL) free(q->store_array[i]);
     // }
-    pthread_mutex_destroy(&q->mutex);
+    // pthread_mutex_destroy(&q->mutex);
+
     free(q->store_array);
     free(q);
 
