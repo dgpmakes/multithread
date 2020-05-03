@@ -13,16 +13,17 @@
 
 
 #define NUM_CONSUMERS 1
+#define ENTRY_DELIMITER " "
+#define MAX_ENTRY_LENGHT 256
 
 //Function declaration
-void printQ(queue* test);
 void* producer(void* producer_args);
 void* consumer(void* consumer_args);
 
 struct producer_args {
     int start;
     int end;
-    struct element* lines;
+    char (*lines)[MAX_ENTRY_LENGHT];
     queue* q;
 };
 
@@ -62,10 +63,10 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
         exit(EXIT_FAILURE);
     } 
 
-    char firstLine[256];
+    char firstLine[MAX_ENTRY_LENGHT];
     int line_count;
 
-    fgets(firstLine, 256, openedFile);
+    fgets(firstLine, MAX_ENTRY_LENGHT, openedFile);
 
     if(atoi(firstLine) == 0){
         fprintf(stderr, "Invalid total number of lines.\n");
@@ -74,31 +75,24 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
 
     line_count = atoi(firstLine);
 
-    if(line_count < atoi(argv[2])) fprintf(stderr, "There can not be more producers than entries.\n");
+    if(line_count < atoi(argv[2])){
+        fprintf(stderr, "There can not be more producers than entries.\n");
+        exit(EXIT_FAILURE);
+    }
 
     /* Load file in memory line per line */
+    char lines[line_count][MAX_ENTRY_LENGHT];
+    char readLine[MAX_ENTRY_LENGHT];
 
-    struct element lines[line_count];
-    char readLine[256];
-    char * delimiter = " ";
     for(int i = 0; i < line_count; i++)
     {
-        char* checkError = fgets(readLine, 256, openedFile);
+        char* checkError = fgets(readLine, MAX_ENTRY_LENGHT, openedFile);
         if(checkError == NULL && feof(openedFile)){ 
             fprintf(stderr, "Unexpected EOF.\n");
             exit(EXIT_FAILURE);
         }
         
-        //First get the index
-        int elements = atoi(strtok(readLine, delimiter));
-        if(i+1 != elements) 
-            fprintf(stderr, "Unexpected index mismatch.\n");
-            
-        int type = atoi(strtok(NULL, delimiter));
-        lines[i].type = type;
-        int time = atoi(strtok(NULL, delimiter));
-        lines[i].time = time;
-
+        strncpy(lines[i], readLine, MAX_ENTRY_LENGHT);
     }
 
     fclose(openedFile);
@@ -140,7 +134,6 @@ int main (int argc, const char * argv[] ) { //command, file_name, num_producers,
 
     // Join all the threads
     for(int i = 0; i < num_producers; i++){
-
         pthread_join(threads[i], NULL);
     }
 
@@ -159,7 +152,22 @@ void* producer(void* args){
     struct producer_args* p_args = args;
     
     for(int i = 0; i < p_args->end - p_args->start + 1; i++){
-        queue_put(p_args->q, p_args->lines[i + p_args->start]);
+        char line[MAX_ENTRY_LENGHT];
+        //Needed for strtok to be thread-safe
+        char * context = line;
+
+        strncpy(line, p_args->lines[i + p_args->start], MAX_ENTRY_LENGHT);
+        // printf("%s\n", line);
+        //Check that indexes are consistent
+        int index = atoi(strtok_r(line, ENTRY_DELIMITER, &context));
+        if(i + p_args->start + 1 != index) 
+            fprintf(stderr, "Warning: unexpected index mismatch.\n");
+
+        struct element elem;
+        elem.type = atoi(strtok_r(NULL, ENTRY_DELIMITER, &context));
+        elem.time = atoi(strtok_r(NULL, ENTRY_DELIMITER, &context));
+
+        queue_put(p_args->q, elem);
     }
 
     pthread_exit(NULL);
